@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAccent">
+
+    <ScrollView
+        android:id="@+id/id_scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <include layout="@layout/item_header"/>
+            <include layout="@layout/item_temperature"/>
+            <include layout="@layout/item_forcast"/>
+            <include layout="@layout/item_aqi"/>
+            <include layout="@layout/item_suggestion"/>
+        </LinearLayout>
+
+
+    </ScrollView>
+
+
+
+</LinearLayout>

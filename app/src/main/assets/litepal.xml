@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+
+    <dbname value="location"/>
+
+    <version value="2"/>
+
+    <list>
+        <mapping class="org.zyb.coolweather.table.Province"/>
+        <mapping class="org.zyb.coolweather.table.City"/>
+        <mapping class="org.zyb.coolweather.table.County"/>
+    </list>
+
+</litepal>

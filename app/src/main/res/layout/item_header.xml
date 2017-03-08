@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    xmlns:tool="http://schemas.android.com/tools">
+
+    <Button
+        android:id="@+id/id_btn_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_home"/>
+
+    <TextView
+        android:id="@+id/id_tv_currentLoc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="18sp"
+        tool:text="中国"/>
+    <TextView
+        android:id="@+id/id_tv_updateTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:textSize="18sp"
+        tool:text="12:30"/>
+
+
+</RelativeLayout>
