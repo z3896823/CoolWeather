@@ -1,5 +1,7 @@
 package org.zyb.coolweather;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -8,11 +10,19 @@ import android.os.Bundle;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private  static boolean isFirstLaunch  = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences sp = getSharedPreferences("launchInfo",MODE_PRIVATE);
+        Boolean isFirstLaunch = sp.getBoolean("isFirstLaunch",true);
+
+        if (!isFirstLaunch){
+            Intent intent = new Intent(this,WeatherActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
     }
 }

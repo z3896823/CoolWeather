@@ -8,6 +8,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Basic {
 
+    @SerializedName("city")
+    public String city;
+
     @SerializedName("update")
     public UpdateTime updateTime;
 

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/id_drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorAccent">
+
 
     <ScrollView
         android:id="@+id/id_scrollView"
@@ -14,16 +15,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            <include layout="@layout/item_header"/>
-            <include layout="@layout/item_temperature"/>
-            <include layout="@layout/item_forcast"/>
-            <include layout="@layout/item_aqi"/>
-            <include layout="@layout/item_suggestion"/>
-        </LinearLayout>
 
+            <include layout="@layout/item_header" />
+
+            <include layout="@layout/item_temperature" />
+
+            <include layout="@layout/item_forecast" />
+
+            <include layout="@layout/item_aqi" />
+
+            <include layout="@layout/item_suggestion" />
+        </LinearLayout>
 
     </ScrollView>
 
 
+    <fragment
+        android:id="@+id/id_f_chooseArea"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/colorPrimary"
+        android:name="org.zyb.coolweather.ChooseAreaFragment"/>
 
-</LinearLayout>
+</android.support.v4.widget.DrawerLayout>

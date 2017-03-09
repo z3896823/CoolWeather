@@ -1,7 +1,9 @@
 package org.zyb.coolweather;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -56,9 +58,11 @@ public class ChooseAreaFragment  extends Fragment {
     private Province selectedProvince;
     private City selectedCity;
 
-    List<Province> provinceList;
-    List<City> cityList;
-    List<County> countyList;
+    private List<Province> provinceList;
+    private List<City> cityList;
+    private List<County> countyList;
+
+//    public Boolean isFirstLaunch ;//这里的修饰符一定要是public等外部类获得本类对象后可以访问到的
 
     @Nullable
     @Override
@@ -86,11 +90,18 @@ public class ChooseAreaFragment  extends Fragment {
                     selectedCity = cityList.get(position);
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY){
-                    Toast.makeText(getActivity(),"weather_id is: "+ countyList.get(position).getWeatherId(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getActivity(),"weather_id is: "+ countyList.get(position).getWeatherId(), Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                    intent.putExtra("currentLoc",countyList.get(position).getCountyName());
+//                    intent.putExtra("currentLoc",countyList.get(position).getCountyName());
                     intent.putExtra("currentWeatherId",countyList.get(position).getWeatherId());
                     startActivity(intent);
+
+                    SharedPreferences sp = getActivity().getSharedPreferences("launchInfo", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putBoolean("isFirstLaunch",false);
+                    editor.apply();//数据量较大的commit可能会ANR，推荐用异步的apply,但是apply没有返回值，不知道存储成功否
+
+                    getActivity().finish();
                 }
             }
         });
