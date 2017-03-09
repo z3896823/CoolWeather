@@ -5,13 +5,17 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 
 import org.zyb.coolweather.Gson.DailyForecast;
 import org.zyb.coolweather.Gson.HeWeather;
@@ -29,16 +33,28 @@ import okhttp3.Response;
 
 /**
  * Created by Administrator on 2017/3/6.
+ *
+ * SharedPreferences设计：
+ * name：historyInfo
+ * keys: weatherInfo,weatherId,backgroundImageUrl
+ *
+ * 天气数据和背景图片的加载原则：
+ * 尽量不要让用户看到空的layout，有历史数据的先加载上再说，后面再去服务器查找是否有更新
  */
 
 public class WeatherActivity extends AppCompatActivity {
 
     private static final String TAG = "ybz";
 
-    private String currentLoc;
-    private String currentWeatherId;
+    public SwipeRefreshLayout swipeRefreshLayout;
 
-    private DrawerLayout drawerLayout;
+    private String backgroundImageUrl;
+
+    public String currentWeatherId;//注意这个修饰符不能用private
+
+    public DrawerLayout drawerLayout;
+
+    private ImageView iv_backgroundPic;
 
     //header
     private Button btn_menu;
@@ -61,13 +77,22 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView tv_carWash;
     private TextView tv_travel;
 
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
+        sp =  getSharedPreferences("historyInfo",MODE_PRIVATE);
+        editor = sp.edit();
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.id_swipeRefresh);
+
         drawerLayout = (DrawerLayout) findViewById(R.id.id_drawerLayout);
+        iv_backgroundPic = (ImageView) findViewById(R.id.id_iv_backgroundPic);
+
         //header
         btn_menu = (Button) findViewById(R.id.id_btn_menu);
         tv_currentLoc = (TextView) findViewById(R.id.id_tv_currentLoc);
@@ -85,15 +110,24 @@ public class WeatherActivity extends AppCompatActivity {
         tv_carWash = (TextView) findViewById(R.id.id_tv_carWash);
         tv_travel = (TextView) findViewById(R.id.id_tv_travel);
 
-//        currentLoc = getIntent().getStringExtra("currentLoc");
-        currentWeatherId = getIntent().getStringExtra("currentWeatherId");
-//        tv_currentLoc.setText(currentLoc);
+        currentWeatherId = getIntent().getStringExtra("currentWeatherId");//如果intent中并无该key所对应的value则返回空
 
-        //先从本地加载数据把空白填上然后再请求新的数据
-        SharedPreferences sharedPreferences = getSharedPreferences("historyInfo",MODE_PRIVATE);
-        String history = sharedPreferences.getString("originalInfo","");
-        if (!history.isEmpty()){
-            showWeather(Utility.parseJsonWithGson(history));
+        if (currentWeatherId == null){
+            currentWeatherId = sp.getString("weatherId",null);
+        }//这个if非常有必要：如果是从选择页面过来的，就不要读历史的weatherId了，但是如果是二次进入，就必须读历史weatherId
+
+        String historicalWeatherInfo = sp.getString("weatherInfo",null);
+        if (historicalWeatherInfo != null){
+            HeWeather weather = Utility.parseJsonWithGson(historicalWeatherInfo);
+            showWeather(weather);
+//            swipeRefreshLayout.setRefreshing(true);//先载入历史数据，然后自动刷新
+        } else{
+            requestWeather();
+        }
+
+        backgroundImageUrl = sp.getString("backgroundImageUrl",null);
+        if (backgroundImageUrl != null){
+            Glide.with(this).load(backgroundImageUrl).into(iv_backgroundPic);
         }
 
         btn_menu.setOnClickListener(new View.OnClickListener() {
@@ -103,9 +137,12 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
 
-        requestWeather();
-
-
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather();
+            }
+        });
     }
 
     /**
@@ -113,26 +150,35 @@ public class WeatherActivity extends AppCompatActivity {
      */
     public void requestWeather(){
 
-        String weatherUrl = "http://guolin.tech/api/weather?cityid="+currentWeatherId+"&key=cfde08fa60e34a8da5e959c79fc181b6";
+        String weatherUrl;
+        //如果既不是从城市选择活动跳过来的，而且本地没有历史数据，则return掉requestWeather防止出错
+        if (currentWeatherId != null){
+            weatherUrl = "http://guolin.tech/api/weather?cityid="+currentWeatherId+"&key=cfde08fa60e34a8da5e959c79fc181b6";
+        } else {
+            Toast.makeText(this, "历史数据异常，请选择城市", Toast.LENGTH_SHORT).show();
+            return;
+        }
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
+
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String result = response.body().string();
+                Log.d(TAG, result);
                 final HeWeather heWeather = Utility.parseJsonWithGson(result);//get weather object
                 if (heWeather != null && heWeather.status.equals("ok")){
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             //把天气数据存储到本地，用sharedPreference
-                            SharedPreferences sharedPreferences = getSharedPreferences("historyInfo",MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("originalInfo",result);
+                            editor.putString("weatherInfo",result);
+                            editor.putString("weatherId",currentWeatherId);
                             editor.apply();
                             showWeather(heWeather);
+                            swipeRefreshLayout.setRefreshing(false);//隐藏进度条
                         }
                     });
                 } else {
-                    Log.d(TAG, "onResponse: heWeather == null");
+                    Log.d(TAG, "onResponse: heWeather == null or status != ok");
                 }
             }
 
@@ -149,7 +195,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     /**
-     * show weather info on activity
+     * show weatherInfo on activity
      */
     public void showWeather(HeWeather heWeather){
 
@@ -175,5 +221,45 @@ public class WeatherActivity extends AppCompatActivity {
         tv_comfort.setText("舒适度："+heWeather.suggestion.comf.comfortInfo);
         tv_carWash.setText("洗车指数："+heWeather.suggestion.carWash.carWashInfo);
         tv_travel.setText("出行建议："+heWeather.suggestion.travel.travelInfo);
+        //backgroundImage
+        getBackgroundPic();
+    }
+
+    /**
+     * load background image
+     */
+    public void getBackgroundPic(){
+
+        //把图片地址存到本地，每次打开时先加载本地图片，并获取新的图片地址与本地进行比较，如果相同，不下载图片，如果不同，联网下载新的图片
+        HttpUtil.sendOkHttpRequest("http://guolin.tech/api/bing_pic", new Callback() {
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                final String picUrl = response.body().string();//服务器上的最新图片url
+                //第一次载入时本地的backgroundImageUrl是null，在这里会导致空指针，所以加一个非空判断
+                if (backgroundImageUrl != null && backgroundImageUrl.equals(picUrl)){
+                    //空方法体，直接执行完，效果相当于return
+                } else {
+                    //更新本地的图片url
+                    editor.putString("backgroundImageUrl",picUrl);
+                    editor.apply();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Glide.with(WeatherActivity.this).load(picUrl).into(iv_backgroundPic);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(WeatherActivity.this, "load background picture failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 }

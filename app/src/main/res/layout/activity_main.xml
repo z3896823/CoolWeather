@@ -4,11 +4,11 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.zyb.coolweather.MainActivity">
+    tools:context="org.zyb.coolweather.FirstLaunchActivity">
 
    <fragment
        android:id="@+id/id_f_chooseArea"
-       android:name="org.zyb.coolweather.ChooseAreaFragment"
+       android:name="org.zyb.coolweather.fragment.ChooseAreaFragment"
        android:layout_width="match_parent"
        android:layout_height="match_parent"/>
 </FrameLayout>

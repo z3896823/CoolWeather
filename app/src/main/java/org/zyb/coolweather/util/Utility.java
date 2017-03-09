@@ -38,7 +38,7 @@ public class Utility {
             return heWeather;
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d(TAG, "parseJsonWithGson: 解析json时出错，请检查服务器返回的json数据");
+            Log.d(TAG, "parseJsonWithGson: 解析json时出错，请检查json数据");
         }
         return null;
     }

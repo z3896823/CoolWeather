@@ -1,4 +1,4 @@
-package org.zyb.coolweather;
+package org.zyb.coolweather.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,6 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
+import org.zyb.coolweather.FirstLaunchActivity;
+import org.zyb.coolweather.R;
+import org.zyb.coolweather.WeatherActivity;
 import org.zyb.coolweather.table.City;
 import org.zyb.coolweather.table.County;
 import org.zyb.coolweather.table.Province;
@@ -35,8 +38,13 @@ import okhttp3.Response;
 /**
  * Created by Administrator on 2017/3/5.
  *
- * 使用queryXxx去寻找数据更新UI，如果找不到就queryFromServer
- * 从网络down下数据后存入数据库，再次执行上一行的操作
+ * 获取省市列表的主要逻辑：
+ * 1、数据永远都是从本地数据库取出来的
+ * 2、如果本地没有，queryFromServer，从服务器得到数据后存入本地数据库，再从本地数据库去取
+ *
+ * 注意事项：
+ * 1、在省市县之间切换的时候要时刻知晓当前是什么level，所以要设置一些全局变量，并当level改变时随时更改
+ * 2、从县级目录跳转到天气页面的时候记得吧weatherId传过去，并同时kill掉当前活动（Fragment随之kill）
  */
 
 public class ChooseAreaFragment  extends Fragment {
@@ -61,8 +69,6 @@ public class ChooseAreaFragment  extends Fragment {
     private List<Province> provinceList;
     private List<City> cityList;
     private List<County> countyList;
-
-//    public Boolean isFirstLaunch ;//这里的修饰符一定要是public等外部类获得本类对象后可以访问到的
 
     @Nullable
     @Override
@@ -90,18 +96,19 @@ public class ChooseAreaFragment  extends Fragment {
                     selectedCity = cityList.get(position);
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY){
-//                    Toast.makeText(getActivity(),"weather_id is: "+ countyList.get(position).getWeatherId(), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
-//                    intent.putExtra("currentLoc",countyList.get(position).getCountyName());
-                    intent.putExtra("currentWeatherId",countyList.get(position).getWeatherId());
-                    startActivity(intent);
+                    if (getActivity() instanceof FirstLaunchActivity){
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("currentWeatherId",countyList.get(position).getWeatherId());
+                        startActivity(intent);
+                        getActivity().finish();
+                    } else if(getActivity() instanceof WeatherActivity){
+                        WeatherActivity weatherActivity = (WeatherActivity) getActivity();
+                        weatherActivity.currentWeatherId = countyList.get(position).getWeatherId();
+                        weatherActivity.drawerLayout.closeDrawers();
+                        weatherActivity.swipeRefreshLayout.setRefreshing(true);
+                        weatherActivity.requestWeather();
+                    }
 
-                    SharedPreferences sp = getActivity().getSharedPreferences("launchInfo", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.putBoolean("isFirstLaunch",false);
-                    editor.apply();//数据量较大的commit可能会ANR，推荐用异步的apply,但是apply没有返回值，不知道存储成功否
-
-                    getActivity().finish();
                 }
             }
         });
@@ -130,7 +137,7 @@ public class ChooseAreaFragment  extends Fragment {
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();//这个方法必须运行在主线程上
-            currentLevel = LEVEL_PROVINCE;//列表载入成功后在设置这个参数比较好
+            currentLevel = LEVEL_PROVINCE;//列表载入成功后在设置这个参数比较好,尽量保证原子性
         } else {
             queryFromServer("http://guolin.tech/api/china","province");
         }
