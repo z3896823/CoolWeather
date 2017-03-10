@@ -4,34 +4,39 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:padding="10dp"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
     <TextView
         android:id="@+id/id_tv_date"
         android:layout_weight="3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="2017-03-08"/>
+        tools:text="2017-03-08"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/id_tv_condition"
         android:layout_weight="2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="小雨转多云"/>
+        tools:text="小雨转多云"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/id_tv_maxTemp"
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="17"/>
+        tools:text="17"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/id_tv_minTemp"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:textColor="@color/white"
         tools:text="13"/>
 
 </LinearLayout>

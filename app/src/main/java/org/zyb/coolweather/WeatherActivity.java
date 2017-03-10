@@ -44,7 +44,7 @@ import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    private static final String TAG = "ybz";
+    private static final String TAG = "ybz-WeatherActivity";
 
     public SwipeRefreshLayout swipeRefreshLayout;
 
@@ -188,6 +188,8 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "requestWeather--onFailure: 获取天气信息失败");
+                        swipeRefreshLayout.setRefreshing(false);//获取失败的情况下也要隐藏进度条
                     }
                 });
             }
@@ -201,7 +203,7 @@ public class WeatherActivity extends AppCompatActivity {
 
         //header
         tv_currentLoc.setText(heWeather.basic.city);
-        tv_updateTime.setText(heWeather.basic.updateTime.time);
+        tv_updateTime.setText(heWeather.basic.updateTime.time.split(" ")[1]);//正则表达式，看一下split方法的源码即明白
         //temperature
         tv_temperature.setText(heWeather.now.temperature + "°C");
         tv_condition.setText(heWeather.now.condition.condition);
@@ -214,8 +216,8 @@ public class WeatherActivity extends AppCompatActivity {
             tv_aqiIndex.setText(heWeather.aqi.aqiCity.aqiIndex);
             tv_pmIndex.setText(heWeather.aqi.aqiCity.pm25Index);
         } else{
-            tv_aqiIndex.setText("无数据");
-            tv_pmIndex.setText("无数据");
+            tv_aqiIndex.setText("无");
+            tv_pmIndex.setText("无");
         }
         //suggestion
         tv_comfort.setText("舒适度："+heWeather.suggestion.comf.comfortInfo);

@@ -12,12 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="生活建议"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/id_tv_comfort"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/white"
         android:layout_marginBottom="5dp"
         tools:text="舒适度：今天白天不热也不冷，风力不大，会感到比较凉爽哦"/>
 
@@ -26,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
+        android:textColor="@color/white"
         tools:text="洗车指数：不宜洗车，今天晚上可能有雨，可能会弄脏您的爱车"/>
 
     <TextView
@@ -33,5 +36,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
+        android:textColor="@color/white"
         tools:text="出行建议：今天晚上可能有降水，建议您带上雨衣出门，以免淋湿感冒"/>
 </LinearLayout>

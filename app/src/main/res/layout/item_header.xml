@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textSize="18sp"
+        android:textColor="@color/white"
         tool:text="中国"/>
     <TextView
         android:id="@+id/id_tv_updateTime"
@@ -26,6 +27,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:textSize="18sp"
+        android:textColor="@color/white"
         tool:text="12:30"/>
 
 
